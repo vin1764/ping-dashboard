@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Ping</title>
+  <meta name="description" content="Your IIT KGP placement updates, only the ones that are about you.">
+  <!-- an installable app (docs/PUSH.md): manifest, icons, theme colour; iOS reads the apple-* tags -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="icons/ping.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#0d6b61">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Ping">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="style.css">
+  <script>try { const t = JSON.parse(localStorage.getItem("ping-theme")); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}</script>
+  <!-- the demo's snapshot starts downloading now, alongside the scripts (app.js picks it up) -->
+  <script>if (/[?&]demo=1\b/.test(location.search) || location.hash === "#demo") window.PING_DEMO_DATA = fetch("demo-data.json", { cache: "no-store" }).then((r) => r.json()).catch(() => null);</script>
+</head>
+<body>
+  <header class="top">
+    <!-- like a contact: round avatar (its ring says what Ping is doing), name, and a status line that changes live -->
+    <a class="brand" href="#chat"><span id="presence" class="avatar" data-state="idle" aria-hidden="true"><svg viewBox="96,110,320,320"><path class="mk-b" d="M140,136h232a44,44,0,0,1,44,44v136a44,44,0,0,1-44,44H238l-78,62v-62h-20a44,44,0,0,1-44-44V180a44,44,0,0,1,44-44z"/><circle class="mk-c" cx="256" cy="248" r="28"/><path class="mk-a" d="M202,200a68,68,0,0,0,0,96M310,200a68,68,0,0,1,0,96"/></svg></span>
+      <span><strong>Ping</strong><span id="subtitle" class="sub" role="status" aria-live="polite">placement updates</span></span></a>
+    <span id="mode-badge" class="badge" hidden></span>
+    <!-- phones: Check now in the header (desktop has it on the rail); its label follows the run live -->
+    <button id="check-now-top" class="check-top" type="button" data-check-now hidden><svg viewBox="0,0,24,24" aria-hidden="true"><path d="M20,12a8,8,0,1,1-2.3-5.6M20,4v5h-5"/></svg><span class="check-label">Check now</span></button>
+  </header>
+  <div id="status" class="status" role="status" hidden></div>
+  <main id="app"><div class="skeleton" aria-label="Loading" role="status"><span></span><span></span><span class="me"></span><span></span></div></main>
+  <!-- wide screens: Today beside the chat (phones: the Today tab) -->
+  <aside id="today-rail" class="today-rail" aria-label="Today"></aside>
+  <!-- phones: a bottom bar; desktop: a slim left rail (same links, plus Check now and the theme) -->
+  <nav id="nav" class="nav" aria-label="Main" hidden>
+    <a href="#chat" data-route="chat"><svg viewBox="0,0,24,24" aria-hidden="true"><path d="M4,5h16v11H9l-5,4z"/></svg>Chat<span id="nav-unread" class="dot" hidden></span></a>
+    <a href="#today" data-route="today" class="today-tab"><svg viewBox="0,0,24,24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4,10h16M9,3v4M15,3v4M9,14.5h2.5"/></svg>Today<span id="nav-today" class="dot" hidden></span></a>
+    <a href="#forms" data-route="forms"><svg viewBox="0,0,24,24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9,4.5V3h6v1.5M8.5,11.5l2,2,4-4M8.5,17h7"/></svg>To do<span id="nav-forms" class="dot" hidden></span></a>
+    <a href="#companies" data-route="companies"><svg viewBox="0,0,24,24" aria-hidden="true"><path d="M4,20V8l6-3v15M10,20V10l10,2v8M3,20h18M14,15h2M14,18h2"/></svg>Companies</a>
+    <a href="#profile" data-route="profile"><svg viewBox="0,0,24,24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4,20c1.5-4,4.5-6,8-6s6.5,2,8,6"/></svg>Profile</a>
+    <span class="rail-gap rail-only"></span>
+    <button id="check-now" class="nav-btn rail-only" type="button" data-check-now><svg viewBox="0,0,24,24" aria-hidden="true"><path d="M20,12a8,8,0,1,1-2.3-5.6M20,4v5h-5"/></svg><span class="check-label">Check now</span></button>
+    <button id="theme-btn" class="nav-btn rail-only" type="button" aria-label="Theme: follows the system"><svg viewBox="0,0,24,24" aria-hidden="true"><path d="M12,3a9,9,0,1,0,9,9,7,7,0,0,1-9-9z"/></svg><span class="theme-label">Theme</span><span class="theme-mode">Auto</span></button>
+  </nav>
+
+  <dialog id="modal"><div id="modal-body"></div><form method="dialog"><button class="btn ghost">Close</button></form></dialog>
+  <dialog id="sheet" class="sheet" aria-labelledby="sheet-title"></dialog>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="onboarding.js"></script>
+  <script src="names.js"></script>
+  <script src="live.js"></script>
+  <script src="today.js"></script>
+  <script src="forms.js"></script>
+  <script src="cards.js"></script>
+  <script src="reply.js"></script>
+  <script src="help.js"></script>
+  <script src="answer_rules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
